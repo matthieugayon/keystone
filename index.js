@@ -38,6 +38,11 @@ var Keystone = function() {
 		render: []
 	};
 	
+	// expose express
+	
+	this.express = express;
+	
+	
 	// init environment defaults
 	
 	this.set('env', process.env.NODE_ENV || 'development');
@@ -64,7 +69,7 @@ var Keystone = function() {
 	this.set('allowed ip ranges', process.env.ALLOWED_IP_RANGES);
 	
 	if (process.env.S3_BUCKET && process.env.S3_KEY && process.env.S3_SECRET) {
-		this.set('s3 config', { bucket: process.env.S3_BUCKET, key: process.env.S3_KEY, secret: process.env.S3_SECRET });
+		this.set('s3 config', { bucket: process.env.S3_BUCKET, key: process.env.S3_KEY, secret: process.env.S3_SECRET, region: process.env.S3_REGION });
 	}
 
 	if (process.env.AZURE_STORAGE_ACCOUNT && process.env.AZURE_STORAGE_ACCESS_KEY) {
@@ -286,11 +291,13 @@ Keystone.prototype.init = function(options) {
 	
 	this.options(options);
 	
-	if (!this.app)
-		this.app = require('express')();
+	if (!this.app) {
+		this.app = express();
+	}
 	
-	if (!this.mongoose)
+	if (!this.mongoose) {
 		this.connect(require('mongoose'));
+	}
 	
 	return this;
 	
@@ -358,6 +365,14 @@ Keystone.prototype.initNav = function(sections) {
  * 
  * Connects to the database, runs updates and listens for incoming requests.
  * 
+ * Events are fired during initialisation to allow customisation, including:
+ * 
+ *   - onStart
+ *   - onHttpServerCreated
+ *   - onHttpsServerCreated
+ * 
+ * If the events argument is a function, it is assumed to be the started event.
+ * 
  * 
  * ####Options:
  * 
@@ -389,16 +404,16 @@ Keystone.prototype.initNav = function(sections) {
  * @api public
  */
 
-Keystone.prototype.start = function(onStart) {
+Keystone.prototype.start = function(events) {
+	
+	if ('function' == typeof events) {
+		events = { onStart: events };
+	}
+	
+	if (!events) events = {};
 	
 	if (!this.app) {
 		throw new Error("KeystoneJS Initialisaton Error:\n\napp must be initialised. Call keystone.init() or keystone.connect(new Express()) first.\n\n");
-	}
-	
-	onStart = onStart || function() {};
-	
-	if (!utils.isFunction(onStart)) {
-		throw new Error("KeystoneJS Initialisaton Error:\n\nThe onStart argument must be a function or undefined.\n\n");
 	}
 		
 	this.nativeApp = true;
@@ -645,7 +660,7 @@ Keystone.prototype.start = function(onStart) {
 			waitForServers--;
 			if (waitForServers) return;
 			console.log(dashes + startupMessages.join('\n') + dashes);
-			onStart();
+			events.onStart && events.onStart();
 		}
 		
 		// Creates the http server and listens to the specified port and host or listen option.
@@ -657,6 +672,7 @@ Keystone.prototype.start = function(onStart) {
 		var createServer = function() {
 			
 			keystone.httpServer = http.createServer(app);
+			events.onHttpServerCreated && events.onHttpServerCreated();
 			
 			var port = keystone.get('port');
 			var ssl = keystone.get('ssl');
@@ -729,6 +745,7 @@ Keystone.prototype.start = function(onStart) {
 					}
 					
 					keystone.httpsServer = https.createServer(sslOpts, app);
+					events.onHttpsServerCreated && events.onHttpsServerCreated();
 					
 					var sslHost = keystone.get('ssl host') || keystone.get('host'),
 						sslPort = keystone.get('ssl port') || 3001;
@@ -807,11 +824,13 @@ Keystone.prototype.routes = function(app) {
 		this.nav = this.initNav();
 	}
 	
+	// Cache compiled view templates if we are in Production mode
 	this.set('view cache', this.get('env') == 'production');
 	
-	var auth = this.get('auth');
+	// Bind auth middleware (generic or custom) to /keystone* routes, allowing
+	// access to the generic signin page if generic auth is used
 	
-	if (auth === true) {
+	if (this.get('auth') === true) {
 		
 		if (!this.get('signout url')) {
 			this.set('signout url', '/keystone/signout');
@@ -828,8 +847,8 @@ Keystone.prototype.routes = function(app) {
 		app.all('/keystone/signout', require('./routes/views/signout'));
 		app.all('/keystone*', this.session.keystoneAuth);
 		
-	} else if ('function' == typeof auth) {
-		app.all('/keystone*', auth);
+	} else if ('function' == typeof this.get('auth')) {
+		app.all('/keystone*', this.get('auth'));
 	}
 	
 	var initList = function(protect) {
@@ -843,18 +862,32 @@ Keystone.prototype.routes = function(app) {
 		}
 	}
 	
+	// Keystone Admin Route
+	app.all('/keystone', require('./routes/views/home'));
+	
+	// Email test routes
 	if (this.get('email tests')) {
 		this.bindEmailTestRoutes(app, this.get('email tests'));
 	}
 	
-	app.all('/keystone', require('./routes/views/home'));
+	// Cloudinary API for image uploading (only if Cloudinary is configured)
+	if (keystone.get('wysiwyg cloudinary images')) {
+		if (!keystone.get('cloudinary config')) {
+			throw new Error("KeystoneJS Initialisaton Error:\n\nTo use wysiwyg cloudinary images, the 'cloudinary config' setting must be configured.\n\n");
+		}
+		app.post('/keystone/api/cloudinary/upload', require('./routes/api/cloudinary').upload);
+	}
 	
-	app.all('/keystone/download/:list', initList(), require('./routes/download/list'));
+	// Generic Lists API
 	app.all('/keystone/api/:list/:action', initList(), require('./routes/api/list'));
 	
+	// Generic Lists Download Route
+	app.all('/keystone/download/:list', initList(), require('./routes/download/list'));
+	
+	// List and Item Details Admin Routes
 	app.all('/keystone/:list/:page([0-9]{1,5})?', initList(true), require('./routes/views/list'));
 	app.all('/keystone/:list/:item', initList(true), require('./routes/views/item'));
-	
+
 	return this;
 	
 };
@@ -1135,6 +1168,10 @@ Keystone.prototype.render = function(req, res, view, ext) {
 		ga: {
 			property: this.get('ga property'),
 			domain: this.get('ga domain')
+		},
+		wysiwygOptions: {
+			enableImages: keystone.get('wysiwyg images') ? true : false,
+			enableCloudinaryUploads: keystone.get('wysiwyg cloudinary images') ? true : false
 		}
 	};
 	

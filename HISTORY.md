@@ -1,5 +1,26 @@
 # Keystone
 
+## v0.2.13 / 2014-04-04
+
+* added; `onHttpServerCreated` and `onHttpsServerCreated` events now fired during `keystone.start()`, allows for integration of things like socket.io
+
+## v0.2.12 / 2014-04-03
+
+* added; initial field support for HTML and Markdown fields
+* improved; some client-side scripts (e.g. TinyMCE) are no longer included when they're not going to be used
+
+## v0.2.11 / 2014-04-02
+
+* added; `.toCSV()` method now supported on schemas to transform data when exported in the Admin UI
+* added; image and uploadimage plugin support for TinyMCE
+* added; cloudinary upload api for generic image uploads, thanks [Branko Sekulic](https://github.com/brankosekulic)
+* added; csrf middleware support, thanks [Lasana Murray](https://github.com/metasansana)
+* added; `express` is now available as a property of `keystone`
+* added; optional support for a the `S3_REGION` environment variable, thanks [DrMoriarty](https://github.com/DrMoriarty)
+* added; IP address range restrictions, thanks [Robert Medeiros](https://github.com/crimeminister)
+* added; support for express `trust proxy` setting, thanks [Robert Medeiros](https://github.com/crimeminister)
+* fixed; Boolean field notes were being escaped incorrectly
+
 ## v0.2.10 / 2014-03-18
 
 * added; new `AzureFile` field type, thanks [Juan Benavides Romero](https://github.com/jbalde)
