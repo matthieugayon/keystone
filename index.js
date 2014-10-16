@@ -97,44 +97,6 @@ var Keystone = function() {
 	
 	// Attach middleware packages, bound to this instance
 	this.initAPI = require('./lib/middleware/initAPI')(this);
-	
-	if (arguments.length == 1) {
-		return this._options[key];
-	}
-	
-	if (remappedOptions[key]) {
-		console.log('Warning: the `' + key + '` option has been deprecated. Please use `' + remappedOptions[key] + '` instead.\n\n' +
-			'Support for `' + key + '` will be removed in a future version.');
-		key = remappedOptions[key];
-	}
-	
-	// handle special settings
-	switch (key) {
-        case 'fsimage config':
-            break;
-		case 'cloudinary config':
-			if (_.isObject(value)) {
-				cloudinary.config(value);
-			}
-			value = cloudinary.config();
-		break;
-		case 'mandrill api key':
-			if (value) {
-				this.mandrillAPI = new mandrillapi.Mandrill(value);
-			}
-		break;
-		case 'auth':
-			if (value === true && !this.get('session')) {
-				this.set('session', true);
-			}
-		break;
-		case 'nav':
-			this.nav = this.initNav(value);
-		break;
-	}
-	
-	this._options[key] = value;
-	return this;
 };
 
 _.extend(Keystone.prototype, require('./lib/core/options')(moduleRoot));
