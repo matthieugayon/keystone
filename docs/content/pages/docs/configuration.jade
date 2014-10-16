@@ -35,7 +35,7 @@ block content
 			a(name='options-project')
 			h3 Project Options
 			
-			p The following options control the branding and navigation of the KeystoneJS application in the Admin UI:
+			p The following options control the branding, navigation and default export settings of the KeystoneJS application in the Admin UI:
 			
 			table.table
 				col(width=210)
@@ -51,6 +51,9 @@ block content
 					td
 						p An object that specifies the navigation structure for the Admin UI. Create a key for each section that should be visible in the primary navigation. Each key's value can be a single list path (as is seen in the URL when you view a list) or an array of list paths. When an array is used, secondary navigation is rendered in the Admin UI.
 						p The nav is also used to generate the links on the Admin UI home page; any lists that are registered but not included in the <code>nav</code> will be grouped at the bottom of the screen under the 'Other' heading.
+				tr
+					td <code>csv field delimiter</code> <code class="data-type">String</code>
+					td Allow you to choose a custom field delimiter to be used for CSV export instead of the default comma.
 			
 			.code-header
 				h4 Custom Navigation Example
@@ -104,15 +107,29 @@ block content
 						p The default local variables to pass to your view templates.
 						p Routes can extend or change local variables by modifying <code>res.locals</code>.
 				tr
-					td <code>static</code> <code class="data-type">String</code>
+					td <code>static</code> <code class="data-type">String</code> or <code class="data-type">Array</code>
 					td
-						p The path to your application's static files. Setting this will include the <code>express.static</code> middleware.
-						p If you're following the <a href="/guide#start_structure">recommended project structure</a>, this should be set to <code class="default-value">"/public"</code>.
+						p One or more paths to your application's static files. Setting this will include the <code>express.static</code> middleware.
+						p If you're following the <a href="/guide#start_structure">recommended project structure</a>, this should be set to <code class="default-value">'public'</code>.
 				tr
-					td <code>less</code> <code class="data-type">String</code>
+					td <code>less</code> <code class="data-type">String</code> or <code class="data-type">Array</code>
 					td
 						p If you want Keystone to automatically compile <strong>.less</strong> files into <strong>.css</strong> files, set this value to the same path as the <code>static</code> option.
-						p When this option is set, any requests to a <strong>.css</strong> or <strong>.min.css</strong> file will first check for a <strong>.less</strong> file with the same name, and if one is found, the css file will be regenerated.
+						p When this option is set, any requests to a <strong>.css</strong> or <strong>.min.css</strong> file will first check for a <strong>.less</strong> file with the same name, and if one is found, the css file will be generated.
+				tr
+					td <code>less options</code> <code class="data-type">Object</code>
+					td
+						p Optional config options that will be passed to the <code>less</code> middleware; see <a href="https://github.com/emberfeather/less.js-middleware" target="_blank">github.com/emberfeather/less.js-middleware</a> for more information.
+				tr
+					td <code>sass</code> <code class="data-type">String</code> or <code class="data-type">Array</code>
+					td
+						p If you want Keystone to automatically compile <strong>.sass</strong> files into <strong>.css</strong> files, set this value to the same path as the <code>static</code> option.
+						p When this option is set, any requests to a <strong>.css</strong> or <strong>.min.css</strong> file will first check for a <strong>.sass</strong> file with the same name, and if one is found, the css file will be generated.
+						p.note Note that enabling this option requires you to have specified the <a href="https://github.com/sass/node-sass" target="_blank"><code>node-sass</code></a> package as a dependency in your project's <code>package.json</code> file; it is not automatically included with Keystone.
+				tr
+					td <code>sass options</code> <code class="data-type">Object</code>
+					td
+						p Optional config options that will be passed to the <code>sass</code> middleware; see <a href="https://github.com/sass/node-sass#options" target="_blank">github.com/sass/node-sass</a> for more information.
 				tr
 					td <code>favicon</code> <code class="data-type">String</code>
 					td
@@ -184,6 +201,10 @@ block content
 						p The url for your MongoDB connection.
 						p You should typically set this to <code class="default-value">"mongodb://localhost/your-db" || process.env.MONGO_URI</code>
 				tr
+					td <code>model prefix</code> <code class="data-type">String</code>
+					td
+						p A prefix to apply to all the mongodb collections used by the models.
+				tr
 					td <code>auth</code> <code class="data-type">Mixed</code>
 					td
 						p Whether to enable built-in auth for Keystone's Admin UI, or a custom function to use to authenticate users.
@@ -199,6 +220,49 @@ block content
 					td
 						p The encryption key to use for your cookies. Passed to Express's cookie parser.
 						p It's a really good idea to set this to a long, random string.
+				tr
+					td <code>session store</code> <code class="data-type">String</code>
+					td
+						p Set this to <code class="default-value">mongo</code> to use your MongoDB database to persist session data.
+						p By default, Keystone will use the in-memory session store provided by Express, which should only be used in development because it does not scale past a single process, and leaks memory over time.
+						p Valid options are:
+						ul
+							li <code class="default-value">mongo</code> (or <code class="default-value">connect-mongo</code>)
+							li <code class="default-value">connect-mongostore</code> (supports replica sets, but requires explicit configuration - see below)
+							li <code class="default-value">connect-redis</code>
+						p.note Session store packages are not bundled with Keystone, so make sure you explicitly add the selected session store to your project's <code>package.json</code>.
+				tr
+					td <code>session store options</code> <code class="data-type">Object</code>
+					td
+						p This option allows you to override the default session store configuration, and is passed to the session store package.
+						p It is required when using the <code class="default-value">connect-mongostore</code> store.
+						
+						.code-header
+							h4 Example for connect-mongostore
+						pre: code.language-javascript
+							| "sessionStore": {
+							|   "db": {
+							|     "name": "myDb",
+							|     "servers": [
+							|       { "host": "192.168.1.100", "port": 28001 },
+							|       { "host": "192.168.1.100", "port": 28002 },
+							|       { "host": "192.168.1.101", "port": 27017 }
+							|     ]
+							|   }
+							| }
+							
+						.code-header
+							h4 Example for connect-redis
+						pre: code.language-javascript
+							| "sessionStore": {
+							|   "host": "", // Redis server hostname
+							|   "port": "", // Redis server port
+							|   "ttl": "", // Redis session TTL in seconds
+							|   "db": "", // Database index to use
+							|   "pass": "", // Password for Redis authentication
+							|   "prefix": "", // Key prefix defaulting to "sess:"
+							|   "url": "", // e.g. redis://user:pass@host:port/db
+							| }
 				tr
 					td <code>back url</code> <code class="data-type">String</code>
 					td
@@ -226,8 +290,69 @@ block content
 						p Defaults to <code class="default-value">/keystone</code>
 			
 			p For more information about setting up and using database models with Keystone, see the <a href="/docs/database">database guide</a>.
+
+
+			a(name='options-ui')
+			h3 Admin UI Options
 			
-			
+			p The following options control some ui options for the Admin backend:
+
+			table.table
+				col(width=210)
+				col
+				tr
+					td <code>wysiwyg images</code> <code class="data-type">Boolean</code>
+					td
+						p Adds an image button which enables including images from other URLS in your WYSIWYG Editor.
+				tr
+					td <code>wysiwyg cloudinary images</code> <code class="data-type">Boolean</code>
+					td
+						p Adds an image upload button and enables cloudinary image uploads directly in your WYSIWYG Editor.
+				tr
+					td <code>wysiwyg additional buttons</code> <code class="data-type">String</code>
+					td
+						p Allows to add additional extra functionality buttons such as <code>blockquote</code>.
+						p A complete list of available buttons can be found at: <a href="http://www.tinymce.com/wiki.php/Controls">http://www.tinymce.com/wiki.php/Controls</a>
+				tr
+					td <code>wysiwyg additional plugins</code> <code class="data-type">String</code>
+					td
+						p Allows for additional plugins to be activated which can be found at: <a href="http://www.tinymce.com/wiki.php/Plugins">http://www.tinymce.com/wiki.php/Plugins</a>
+				tr
+					td <code>wysiwyg additional options</code> <code class="data-type">Object</code>
+					td
+						p Allows for additional TinyMCE options, such as <code>{ menubar: true }</code> to be modified.
+				tr
+					td <code>wysiwyg override toolbar</code> <code class="data-type">Booelan</code>
+					td
+						p This will remove the default set of buttons for wysiwyg mode. Use this with <code>wysiwyg additional buttons</code> and <code>wysiwyg additional plugins</code>. Defaults to <code class="data-type">false</code>.
+				tr
+					td <code>wysiwyg menubar</code> <code class="data-type">Boolean</code>
+					td
+						p Show the menubar for wysiwyg editor. Defaults to <code class="data-type">false</code>.
+						p See <a href="http://www.tinymce.com/wiki.php/Configuration:menubar">http://www.tinymce.com/wiki.php/Configuration:menubar</a> for more details
+				tr
+					td <code>wysiwyg skin</code> <code class="data-type">String</code>
+					td
+						p Allow to change skin. Defaults to <code class="data-type">keystone</code>.
+						p See <a href="http://www.tinymce.com/wiki.php/Configuration:skin">http://www.tinymce.com/wiki.php/Configuration:skin</a> for more details
+
+							.code-header
+								h4 Example using wysiwyg options
+							pre: code.language-javascript
+								| keystone.init({
+								| 'wysiwyg override toolbar': false,
+								| 'wysiwyg menubar': true,
+								| 'wysiwyg skin': 'lightgray',
+								| 'wysiwyg additional buttons': 'searchreplace visualchars,'
+								|  + ' charmap ltr rtl pagebreak paste, forecolor backcolor,'
+								|  +' emoticons media, preview print ',
+								| 'wysiwyg additional plugins': 'example, table, advlist, anchor,'
+								|  + ' autolink, autosave, bbcode, charmap, contextmenu, '
+								|  + ' directionality, emoticons, fullpage, hr, media, pagebreak,'
+								|  + ' paste, preview, print, searchreplace, textcolor,'
+								|  + ' visualblocks, visualchars, wordcount',
+								| });
+
 			//- a(name='emails')
 			//- h2 Emails
 			//- 
@@ -237,8 +362,29 @@ block content
 			a(name='services')
 			h2 Services
 			
+			a(name='services-google-analytics')
+			h3 Google Analytics
 			
-			a(name='services-google')
+			p Keystone has support for Google Analytics tracking in the Admin UI. To enable tracking, set the following configuration options:
+			
+			table.table
+				col(width=270)
+				col
+				tr
+					td <code>ga property</code> <code class="data-type">String</code>
+					td
+						p Your Google Analytics Property
+						p Will default to <code class="default-value">process.env.GA_PROPERTY</code>
+				tr
+					td <code>ga domain</code> <code class="data-type">String</code>
+					td
+						p Your Google Analytics Domain
+						p Will default to <code class="default-value">process.env.GA_DOMAIN</code>
+			
+			p.note Note if you only want to include Google Analytics tracking in the front-end of your project, you should use different variable names from those above.
+			
+			
+			a(name='services-google-maps')
 			h3 Google Maps
 			
 			p Keystone's <a href="/docs/database#field_location">Location field type</a> supports integration with the <a href="http://www.morethanamap.com" target="_blank">Google Maps API</a> to auto-improve values (including discovering latitude and longitude) via the <a href="https://developers.google.com/places/documentation/autocomplete" target="_blank"> Places Autocomplete API</a>.
@@ -259,7 +405,7 @@ block content
 						p Your Google API server key, used to authenticate requests to the Maps API from the server.
 						p Will default to <code class="default-value">process.env.GOOGLE_SERVER_KEY</code>
 				tr
-					td <code>default region</code> <code class="data-type">String</code> 
+					td <code>default region</code> <code class="data-type">String</code>
 					td
 						p <strong>Optional</strong> setting to limit autocomplete results to a specific region.
 						p This option takes a region code, specified as a <a href="http://www.iana.org/assignments/language-subtag-registry/language-subtag-registry" target="_blank">IANA language region</a> subtag.
@@ -328,14 +474,24 @@ block content
 					li <code class="default-value">{list.path}_{field.path}_{item.id}</code>
 					li <code class="default-value">{prefix}</code> (if set)
 					li <code class="default-value">dev</code> (if the <code>env</code> option is not set to <code class="default-value">production</code>)
-			
+
+			p You may optionally enabled the Cloudinary upload folder option by setting the Keystone <code>cloudinary folders</code> option to <code class="default-value">true</code>. The default Cloudinary folder will be set based on the following rules:
+				ul
+					li <code class="default-value">{list.path}/{field.path}/</code> (when <code>cloudinary prefix</code> is not set)
+					li <code class="default-value">{prefix}/{list.path}/{field.path}/</code> (when <code>cloudinary prefix</code> is set)
+	
+			p.note You may override the default Cloudinary folder by setting the <code class="default-value">folder</code> option directly on a <code>CloudinaryImage</code> field (see <a href="/docs/database#fieldtypes-cloudinaryimage">CloudinaryImage</a> options) or a <code>CloudinaryImages</code> field (see <a href="/docs/database#fieldtypes-cloudinaryimages">CloudinaryImages</a> options).
+
 			pre: code.language-javascript
 				| keystone.set('cloudinary config', { cloud_name: 'my-cloud', api_key: 'abc', api_secret: '123' });
-				| // or 
+				| // or
 				| keystone.set('cloudinary config', 'cloudinary://api_key:api_secret@cloud_name' );
 				| 
 				| // optional, will prefix all built-in tags with 'keystone_'
 				| keystone.set('cloudinary prefix', 'keystone');
+				| 
+				| // optional, will prefix each image public_id with [{prefix}]/{list.path}/{field.path}/
+				| keystone.set('cloudinary folders', true);
 			
 			
 			a(name='services-embedly')
@@ -355,8 +511,7 @@ block content
 
 			a(name='services-mandrill')
 			h3 Mandrill
-			p <a href="http://mandrill.com" target="_blank">Mandrill</a> is a scalable and affordable email infrastructure service that allows you to send emails easily. They offer a free plan for up to 12,000
-			emails per month.
+			p <a href="http://mandrill.com" target="_blank">Mandrill</a> is a scalable and affordable email infrastructure service that allows you to send emails easily. They offer a free plan for up to 12,000 emails per month.
 
 			p To configure KeystoneJS to support the Mandrill API, simply <a href="https://mandrill.com/signup/">sign up for an account</a>, get your api key, and set both the <code>mandrill api key</code> and <code>mandrill username</code> options.
 			
@@ -419,6 +574,6 @@ block content
 			a(name='headless')
 			h2 Disabling the Admin UI
 			
-			p You can disable the Admin UI by setting the <code>headless</code> option to <code class="default-value">false</code>.
+			p You can disable the Admin UI by setting the <code>headless</code> option to <code class="default-value">true</code>.
 			
 			p This will allow you to use <code>keystone.start()</code> or <code>keystone.routes(app)</code> without Keystone creating route bindings for the Admin UI routes under <code class="default-value">/keystone</code>.

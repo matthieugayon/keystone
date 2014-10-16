@@ -8,6 +8,10 @@ lib-cov
 *.gz
 *.DS_Store
 
+# vim tmp/swp files
+*.swp
+*.un~
+
 pids
 logs
 results
@@ -21,4 +25,8 @@ node_modules/
 *.iws
 .idea/
 
-_site/
+docs/_dist
+coverage.html
+.cover*
+
+*.sublime-*

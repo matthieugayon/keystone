@@ -1,9 +1,10 @@
-var Path = require("../../lib/path")
+var demand = require('must'),
+	Path = require("../../lib/path");
 
 describe("Path", function() {
 	describe("new", function() {
 		it("must be an instance of Path", function() {
-			new Path("").must.be.an.instanceof(Path)
+			new Path("").must.be.an.instanceof(Path);
 		})
 	})
 
@@ -32,6 +33,10 @@ describe("Path", function() {
 		it("must walk hierarchy and return value", function() {
 			var path = new Path("foo.example.dir")
 			path.get({foo: {example: {dir: 42}}}).must.equal(42)
+		})
+		it("must return undefined when a path isn't present", function() {
+			var path = new Path("foo.example.dir")
+			demand(path.get({})).be.undefined()
 		})
 	})
 
