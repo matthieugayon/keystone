@@ -1,4 +1,4 @@
-var _ = require('lodash');
+ var _ = require('lodash');
 var ejs = require('ejs');
 var path = require('path');
 
@@ -47,6 +47,7 @@ module.exports = function IndexRoute (keystone) {
 				menubar: keystone.get('wysiwyg menubar'),
 				importcss: keystone.get('wysiwyg importcss') || '',
 			} },
+			permissions: keystone.permissions
 		};
 		keystoneData.csrf.header[keystone.security.csrf.CSRF_HEADER_KEY] = keystone.security.csrf.getToken(req, res);
 

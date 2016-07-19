@@ -14,6 +14,8 @@ var PrimaryNavigation = React.createClass({
 		currentSectionKey: React.PropTypes.string,
 		sections: React.PropTypes.array.isRequired,
 		signoutUrl: React.PropTypes.string,
+		user: React.PropTypes.object.isRequired,
+ 		permissions: React.PropTypes.object.isRequired
 	},
 	getInitialState () {
 		return {};
@@ -85,6 +87,17 @@ var PrimaryNavigation = React.createClass({
 			// Get the link and the class name
 			const href = section.lists[0].external ? section.lists[0].path : `${Keystone.adminPath}/${section.lists[0].path}`;
 			const className = (this.props.currentSectionKey && this.props.currentSectionKey === section.key) ? 'primary-navbar__item--active' : null;
+
+			let hasPermissionsToReadSomeListsInSection = false;
+
+			section.lists.map((list) => {
+				if (hasPermissionsToReadSomeListsInSection) return;
+				hasPermissionsToReadSomeListsInSection = this.props.user.roles.filter((n) => {
+					return this.props.permissions[list.key].roles.read.indexOf(n) != -1;
+				}).length > 0;
+			});
+
+			if (!hasPermissionsToReadSomeListsInSection) return null;
 
 			return (
 				<PrimaryNavItem

@@ -16,14 +16,20 @@ const ItemsTable = React.createClass({
 		list: PropTypes.object.isRequired,
 		manageMode: PropTypes.bool.isRequired,
 		rowAlert: PropTypes.object.isRequired,
+		user: React.PropTypes.object.isRequired,
+ 		permissions: React.PropTypes.object.isRequired
 	},
 	renderCols () {
 		let cols = this.props.columns.map(col => (
 			<col key={col.path} width={col.width} />
 		));
 
+		let hasListDeletePermissions = this.props.user.roles.filter((n) => {
+				return this.props.permissions[this.props.list.key].roles.delete.indexOf(n) != -1;
+			}).length > 0;
+
 		// add delete col when available
-		if (!this.props.list.nodelete) {
+		if (!this.props.list.nodelete && hasListDeletePermissions) {
 			cols.unshift(
 				<col width={TABLE_CONTROL_COLUMN_WIDTH} key="delete" />
 			);
@@ -45,8 +51,12 @@ const ItemsTable = React.createClass({
 	renderHeaders () {
 		let listControlCount = 0;
 
+		let hasListDeletePermissions = this.props.user.roles.filter((n) => {
+				return this.props.permissions[this.props.list.key].roles.delete.indexOf(n) != -1;
+			}).length > 0;
+
 		if (this.props.list.sortable) listControlCount++;
-		if (!this.props.list.nodelete) listControlCount++;
+		if (!this.props.list.nodelete || hasListDeletePermissions) listControlCount++;
 
 		// set active sort
 		const activeSortPath = this.props.activeSort.paths[0];

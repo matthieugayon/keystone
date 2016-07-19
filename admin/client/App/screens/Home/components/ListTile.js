@@ -11,11 +11,27 @@ var ListTile = React.createClass({
 		label: React.PropTypes.string,
 		path: React.PropTypes.string,
 		spinner: React.PropTypes.object,
+		listkey: React.PropTypes.string
 	},
 	render () {
 		var opts = {
 			'data-list-path': this.props.path,
 		};
+
+		let canCreateLists = this.props.user.roles.filter((n) => {
+			return this.props.permissions[this.props.listkey].roles.create.indexOf(n) != -1;
+		}).length > 0;
+
+		let renderCreateLink = null;
+		if (canCreateLists) {
+			renderCreateLink = (<Link
+				to={this.props.href + '?create'}
+				className="dashboard-group__list-create octicon octicon-plus"
+				title="Create"
+				tabIndex="-1"
+			/>);
+		}
+
 		return (
 			<div className="dashboard-group__list" {...opts}>
 				<span className="dashboard-group__list-inner">
@@ -25,12 +41,7 @@ var ListTile = React.createClass({
 					</Link>
 					{/* If we want to create a new list, we append ?create, which opens the
 						create form on the new page! */}
-					<Link
-						to={this.props.href + '?create'}
-						className="dashboard-group__list-create octicon octicon-plus"
-						title="Create"
-						tabIndex="-1"
-					/>
+					{renderCreateLink}
 				</span>
 			</div>
 		);

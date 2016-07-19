@@ -30,18 +30,24 @@ const App = (props) => {
 					currentSectionKey={currentSectionKey}
 					sections={Keystone.nav.sections}
 					signoutUrl={Keystone.signoutUrl}
+					user={Keystone.user}
+					permissions={Keystone.permissions}
 				/>
 				<PrimaryNavigation
 					currentSectionKey={currentSectionKey}
 					brand={Keystone.brand}
 					sections={Keystone.nav.sections}
 					signoutUrl={Keystone.signoutUrl}
+					user={Keystone.user}
+					permissions={Keystone.permissions}
 				/>
 				{/* If a section is open currently, show the secondary nav */}
 				{(currentSection) ? (
 					<SecondaryNavigation
 						currentListKey={props.params.listId}
 						lists={currentSection.lists}
+						user={Keystone.user}
+						permissions={Keystone.permissions}
 					/>
 				) : null}
 			</header>

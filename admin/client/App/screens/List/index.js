@@ -207,6 +207,16 @@ const ListView = React.createClass({
 	},
 	renderCreateButton () {
 		if (this.props.currentList.nocreate) return null;
+
+		// permissions --------------------------------------------------------------------------------
+		let hasListCreatePermissions = this.props.user.roles.filter((n) => {
+ 			return this.props.permissions[this.props.currentList.key].roles.create.indexOf(n) != -1;
+ 		}).length > 0;
+
+ 		if (!hasListCreatePermissions) return null;
+ 		// --------------------------------------------------------------------------------------------
+
+
 		var props = { type: 'success' };
 		if (this.props.currentList.autocreate) {
 			props.onClick = () => this.createAutocreate();
@@ -254,13 +264,24 @@ const ListView = React.createClass({
 		const buttonNoteStyles = { color: '#999', fontWeight: 'normal' };
 		const groupStyles = { marginBottom: 0 };
 
+		// permissions --------------------------------------------------------------------------------
+		const hasListUpdatePermissions = this.props.user.roles.filter((n) => {
+ 				return this.props.permissions[list.key].roles.update.indexOf(n) != -1;
+ 			}).length > 0;
+
+		const hasListDeletePermissions = this.props.user.roles.filter((n) => {
+		 				return this.props.permissions[list.key].roles.delete.indexOf(n) != -1;
+		 			}).length > 0;
+		// --------------------------------------------------------------------------------------------
+
+
 		// action buttons
-		const actionUpdateButton = !list.noedit ? (
+		const actionUpdateButton = (!list.noedit || hasListUpdatePermissions) ? (
 			<InputGroup.Section>
 				<Button onClick={this.toggleUpdateModal} disabled={!checkedItemCount}>Update</Button>
 			</InputGroup.Section>
 		) : null;
-		const actionDeleteButton = !list.nodelete ? (
+		const actionDeleteButton = (!list.nodelete || hasListDeletePermissions) ? (
 			<InputGroup.Section>
 				<Button onClick={this.massDelete} disabled={!checkedItemCount}>Delete</Button>
 			</InputGroup.Section>
@@ -477,6 +498,15 @@ const ListView = React.createClass({
 		var props = { type: 'success' };
 		const list = this.props.currentList;
 		if (list.nocreate) return null;
+
+		// permissions --------------------------------------------------------------------------------
+		let hasListCreatePermissions = this.props.user.roles.filter((n) => {
+	 			return this.props.permissions[list.key].roles.create.indexOf(n) != -1;
+	 		}).length > 0;
+
+ 		if (!hasListCreatePermissions) return null;
+		//---------------------------------------------------------------------------------------------
+
 		if (list.autocreate) {
 			props.onClick = () => this.createAutocreate();
 		} else {
@@ -556,6 +586,8 @@ const ListView = React.createClass({
 								pageSize={this.props.lists.page.size}
 								drag={this.props.lists.drag}
 								dispatch={this.props.dispatch}
+								user={this.props.user}
+ +								permissions={this.props.permissions}
 							/>
 							{this.renderNoSearchResults()}
 						</div>

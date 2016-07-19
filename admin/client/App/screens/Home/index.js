@@ -51,6 +51,8 @@ var HomeView = React.createClass({
 							counts={this.props.counts}
 							lists={Keystone.lists}
 							spinner={spinner}
+							user={Keystone.user}
+							permissions={Keystone.permissions}
 						/>
 					) : (
 						<div>
@@ -62,6 +64,8 @@ var HomeView = React.createClass({
 											counts={this.props.counts}
 											lists={navSection.lists}
 											spinner={spinner}
+											user={Keystone.user}
+			 								permissions={Keystone.permissions}
 										/>
 									</Section>
 								);
@@ -73,6 +77,8 @@ var HomeView = React.createClass({
 										counts={this.props.counts}
 										lists={Keystone.orphanedLists}
 										spinner={spinner}
+										user={Keystone.user}
+		 								permissions={Keystone.permissions}
 									/>
 								</Section>
 							) : null}

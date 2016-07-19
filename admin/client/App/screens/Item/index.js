@@ -146,6 +146,8 @@ var ItemView = React.createClass({
 								list={this.props.currentList}
 								data={this.props.data}
 								toggleCreate={this.toggleCreate}
+								user={this.props.user}
+ 								permissions={this.props.permissions}
 							/>
 							<CreateForm
 								list={this.props.currentList}
@@ -158,6 +160,8 @@ var ItemView = React.createClass({
 								data={this.props.data}
 								dispatch={this.props.dispatch}
 								router={this.context.router}
+								user={this.props.user}
+ 								permissions={this.props.permissions}
 							/>
 						</Container>
 						{this.renderRelationships()}

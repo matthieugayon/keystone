@@ -12,6 +12,8 @@ var SecondaryNavigation = React.createClass({
 	propTypes: {
 		currentListKey: React.PropTypes.string,
 		lists: React.PropTypes.array.isRequired,
+		user: React.PropTypes.object.isRequired,
+ 		permissions: React.PropTypes.object.isRequired
 	},
 	getInitialState () {
 		return {};
@@ -36,6 +38,12 @@ var SecondaryNavigation = React.createClass({
 			// Get the link and the classname
 			const href = list.external ? list.path : `${Keystone.adminPath}/${list.path}`;
 			const className = (this.props.currentListKey && this.props.currentListKey === list.path) ? 'active' : null;
+
+			let hasListReadPermissions = this.props.user.roles.filter((n) => {
+				return this.props.permissions[list.key].roles.read.indexOf(n) != -1;
+			}).length > 0;
+
+			if (!hasListReadPermissions) return null;
 
 			return (
 				<SecondaryNavItem
