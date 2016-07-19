@@ -206,6 +206,9 @@ const ListView = React.createClass({
 		);
 	},
 	renderCreateButton () {
+
+		console.log('this.props ListView', this.props);
+
 		if (this.props.currentList.nocreate) return null;
 
 		// permissions --------------------------------------------------------------------------------
@@ -587,7 +590,7 @@ const ListView = React.createClass({
 								drag={this.props.lists.drag}
 								dispatch={this.props.dispatch}
 								user={this.props.user}
- +								permissions={this.props.permissions}
+ 								permissions={this.props.permissions}
 							/>
 							{this.renderNoSearchResults()}
 						</div>
@@ -628,12 +631,16 @@ const ListView = React.createClass({
 					list={this.props.currentList}
 					onCancel={() => this.toggleCreateModal(false)}
 					onCreate={this.onCreate}
+					user={this.props.user}
+					permissions={this.props.permissions}
 				/>
 				<UpdateForm
 					isOpen={this.state.showUpdateForm}
 					itemIds={Object.keys(this.state.checkedItems)}
 					list={this.props.currentList}
 					onCancel={() => this.toggleUpdateModal(false)}
+					user={this.props.user}
+					permissions={this.props.permissions}
 				/>
 				{this.renderConfirmationDialog()}
 			</div>
@@ -652,5 +659,7 @@ module.exports = connect((state) => {
 		ready: state.lists.ready,
 		rowAlert: state.lists.rowAlert,
 		active: state.active,
+		user : Keystone.user,
+		permissions : Keystone.permissions
 	};
 })(ListView);

@@ -262,8 +262,8 @@ var EditForm = React.createClass({
 				return this.props.permissions[this.props.list.key].roles.update.indexOf(n) != -1;
 			}).length > 0;
 
-		let hasListUpdatePermissions = this.props.user.roles.filter((n) => {
-				return this.props.permissions[this.props.list.key].roles.update.indexOf(n) != -1;
+		let hasListDeletePermissions = this.props.user.roles.filter((n) => {
+				return this.props.permissions[this.props.list.key].roles.delete.indexOf(n) != -1;
 			}).length > 0;
 
 		if (hasListUpdatePermissions) {

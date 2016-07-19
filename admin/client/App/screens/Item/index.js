@@ -154,6 +154,8 @@ var ItemView = React.createClass({
 								isOpen={this.state.createIsOpen}
 								onCancel={() => this.toggleCreate(false)}
 								onCreate={(item) => this.onCreate(item)}
+								user={this.props.user}
+ 								permissions={this.props.permissions}
 							/>
 							<EditForm
 								list={this.props.currentList}
@@ -178,4 +180,6 @@ module.exports = connect((state) => ({
 	ready: state.item.ready,
 	error: state.item.error,
 	currentList: state.lists.currentList,
+	user : Keystone.user,
+	permissions : Keystone.permissions
 }))(ItemView);

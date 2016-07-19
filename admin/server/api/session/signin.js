@@ -29,6 +29,7 @@ function signin (req, res) {
 										res.json({ success: true, user: user });
 									})
 									.catch((err) => {
+										console.log('second post:signin error', err);
 										if (err) return res.json({ error: 'post:signin error', detail: err });
 									});
 							});

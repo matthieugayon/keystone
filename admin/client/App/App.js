@@ -21,6 +21,10 @@ const App = (props) => {
 	}
 	// Default current section key to dashboard
 	const currentSectionKey = (currentSection && currentSection.key) || 'dashboard';
+
+	props.user = Keystone.user;
+	props.permissions = Keystone.permissions;
+
 	return (
 		<div className="keystone-wrapper">
 			<header className="keystone-header">
@@ -60,6 +64,7 @@ const App = (props) => {
 				brand={Keystone.brand}
 				User={Keystone.User}
 				user={Keystone.user}
+				permissions={Keystone.permissions}
 				version={Keystone.version}
 			/>
 		</div>
