@@ -10,15 +10,13 @@ class Lists extends React.Component {
 		let hasListReadPermissions = {};
 		let hasReadPermissionsForSomeLists = false;
 
-		console.log('this.props', this.props);
-
-		this.props.lists.map((list) => {
+		_.map(this.props.lists, (list, key) => {
 			hasListReadPermissions[list.key] = this.props.user.roles.filter((n) => {
 					return this.props.permissions[list.key].roles.read.indexOf(n) != -1;
 			}).length > 0;
 			hasReadPermissionsForSomeLists = hasReadPermissionsForSomeLists ? hasReadPermissionsForSomeLists : hasListReadPermissions[list.key];
 		});
-		if (!hasReadPermissionsForSomeLists) return;
+		if (!hasReadPermissionsForSomeLists) return null;
 
 		return (
 			<div className="dashboard-group__lists">

@@ -207,8 +207,6 @@ const ListView = React.createClass({
 	},
 	renderCreateButton () {
 
-		console.log('this.props ListView', this.props);
-
 		if (this.props.currentList.nocreate) return null;
 
 		// permissions --------------------------------------------------------------------------------

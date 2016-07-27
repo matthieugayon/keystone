@@ -4,7 +4,8 @@ var async = require('async');
 module.exports = function (req, res) {
 	var counts = {};
 	async.each(keystone.lists, function (list, next) {
-		list.model.count(function (err, count) {
+		let query = getQuery(list, req.user) || list.model;
+		query.count(function (err, count) {
 			counts[list.key] = count;
 			next(err);
 		});
@@ -15,3 +16,12 @@ module.exports = function (req, res) {
 		});
 	});
 };
+
+function getQuery(list, user) {
+	if (!user) return null;
+	if (list.schema.methods.getApiFilter) {
+		var filter = list.schema.methods.getApiFilter(user);
+		return list.model.find(filter);;
+	}
+	return null;
+}

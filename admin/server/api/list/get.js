@@ -8,12 +8,19 @@ module.exports = function (req, res) {
 		try { filters = JSON.parse(req.query.filters); }
 		catch (e) { } // eslint-disable-line no-empty
 	}
+
+	// LIST "GET API" FILTER
+	if (req.list.schema.methods.getApiFilter) {
+		assign(where, req.list.schema.methods.getApiFilter(req.user));
+	}
+
 	if (typeof filters === 'object') {
 		assign(where, req.list.addFiltersToQuery(filters));
 	}
 	if (req.query.search) {
 		assign(where, req.list.addSearchToQuery(req.query.search));
 	}
+
 	var query = req.list.model.find(where);
 	if (req.query.populate) {
 		query.populate(req.query.populate);
@@ -24,6 +31,7 @@ module.exports = function (req, res) {
 		});
 	}
 	var sort = req.list.expandSort(req.query.sort);
+
 	async.waterfall([
 		function (next) {
 			query.count(next);
@@ -45,6 +53,7 @@ module.exports = function (req, res) {
 			res.logError('admin/server/api/list/get', 'database error finding items', err);
 			return res.apiError('database error', err);
 		}
+
 		return res.json({
 			results: items.map(function (item) {
 				return req.list.getData(item, req.query.select, req.query.expandRelationshipFields);

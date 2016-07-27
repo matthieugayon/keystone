@@ -42,7 +42,9 @@ password.prototype.addToSchema = function () {
 	schema.path(this.path, _.defaults({
 		type: String,
 		set: function (newValue) {
-			this[needs_hashing] = true;
+			this[needs_hashing] = (this[needs_hashing] !== undefined
+				&& this[needs_hashing] !== null
+				&& this[needs_hashing] !== 'undefined') ? this[needs_hashing] : true;
 			return newValue;
 		},
 	}, this.options));
@@ -59,6 +61,7 @@ password.prototype.addToSchema = function () {
 		// reset the [needs_hashing] flag so that new values can't be hashed more than once
 		// (inherited models double up on pre save handlers for password fields)
 		this[needs_hashing] = false;
+
 		if (!this.get(field.path)) {
 			this.set(field.path, undefined);
 			return next();
@@ -72,6 +75,7 @@ password.prototype.addToSchema = function () {
 				if (err) {
 					return next(err);
 				}
+
 				// override the cleartext password with the hashed one
 				item.set(field.path, hash);
 				next();

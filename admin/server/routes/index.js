@@ -6,12 +6,9 @@ var templatePath = path.resolve(__dirname, '../templates/index.html');
 
 module.exports = function IndexRoute (keystone) {
 	return function (req, res) {
-
 		var lists = {};
 		_.forEach(keystone.lists, function (list, key) {
 			lists[key] = list.getOptions();
-
-            console.log('list.getOptions();', list.getOptions());
 		});
 
 		var UserList = keystone.list(keystone.get('user model'));
