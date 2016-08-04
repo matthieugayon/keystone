@@ -9,11 +9,6 @@ module.exports = function (req, res) {
 		catch (e) { } // eslint-disable-line no-empty
 	}
 
-	// LIST "GET API" FILTER
-	if (req.list.schema.methods.getApiFilter) {
-		assign(where, req.list.schema.methods.getApiFilter(req.user));
-	}
-
 	if (typeof filters === 'object') {
 		assign(where, req.list.addFiltersToQuery(filters));
 	}
@@ -21,20 +16,34 @@ module.exports = function (req, res) {
 		assign(where, req.list.addSearchToQuery(req.query.search));
 	}
 
-	var query = req.list.model.find(where);
-	if (req.query.populate) {
-		query.populate(req.query.populate);
-	}
-	if (req.query.expandRelationshipFields && req.query.expandRelationshipFields !== 'false') {
-		req.list.relationshipFields.forEach(function (i) {
-			query.populate(i.path);
-		});
-	}
 	var sort = req.list.expandSort(req.query.sort);
+	var query;
 
 	async.waterfall([
 		function (next) {
-			query.count(next);
+			if (req.list.schema.methods.getApiFilter) {
+				req.list.schema.methods.getApiFilter(req.user, function (agiGetFilter) {
+					if (agiGetFilter) {
+						assign(where, agiGetFilter);
+					}
+					buildQuery();
+				});
+			} else {
+				buildQuery();
+			}
+
+			function buildQuery() {
+				query = req.list.model.find(where);
+				if (req.query.populate) {
+					query.populate(req.query.populate);
+				}
+				if (req.query.expandRelationshipFields && req.query.expandRelationshipFields !== 'false') {
+					req.list.relationshipFields.forEach(function (i) {
+						query.populate(i.path);
+					});
+				}
+				query.count(next);
+			}
 		},
 		function (count, next) {
 			var skipCount = Number(req.query.skip) || 0;

@@ -21,17 +21,7 @@ function signin (req, res) {
 						session.signinWithUser(user, req, res, function () {
 							keystone.callHook(user, 'post:signin', function (err) {
 								if (err) return res.json({ error: 'post:signin error', detail: err });
-
-								// get permissions
-								acl.getListPermissions()
-									.then((permissions) => {
-										//console.log('permissions fetch success', permissions);
-										keystone.permissions = permissions;
-										res.json({ success: true, user: user });
-									})
-									.catch((err) => {
-										if (err) return res.json({ error: 'post:signin error', detail: err });
-									});
+								res.json({ success: true, user: user });
 							});
 						});
 					} else if (err) {

@@ -4,10 +4,13 @@ var async = require('async');
 module.exports = function (req, res) {
 	var counts = {};
 	async.each(keystone.lists, function (list, next) {
-		let query = getQuery(list, req.user) || list.model;
-		query.count(function (err, count) {
-			counts[list.key] = count;
-			next(err);
+		getQuery(list, req.user, function (filter) {
+			//console.log('filter', filter);
+			let query = filter ?  list.model.find(filter) : list.model;
+			query.count(function (err, count) {
+				counts[list.key] = count;
+				next(err);
+			});
 		});
 	}, function (err) {
 		if (err) return res.apiError('database error', err);
@@ -17,11 +20,11 @@ module.exports = function (req, res) {
 	});
 };
 
-function getQuery(list, user) {
-	if (!user) return null;
+function getQuery(list, user, callback) {
+	if (!user) return callback(null);
 	if (list.schema.methods.getApiFilter) {
-		var filter = list.schema.methods.getApiFilter(user);
-		return list.model.find(filter);;
+		list.schema.methods.getApiFilter(user, callback);
+	} else {
+		callback(null);
 	}
-	return null;
 }
