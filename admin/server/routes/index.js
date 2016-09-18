@@ -10,7 +10,6 @@ module.exports = function IndexRoute (keystone) {
 	return function (req, res) {
 
         var locals;
-
         async.series([
             function (callback) {
                 // PERMISSIONS SETUP
@@ -23,7 +22,7 @@ module.exports = function IndexRoute (keystone) {
                     .catch((err) => {
                         locals = setLocals(req, res, keystone);
                         callback();
-                    })
+                    });
             },
             function (callback) {
                 ejs.renderFile(templatePath, locals, {}, function (err, str) {
@@ -68,7 +67,8 @@ function setLocals(req, res, keystone, permissions) {
         user: {
             id: req.user.id,
             name: UserList.getDocumentName(req.user),
-            roles : req.user.roles
+            roles : req.user.roles,
+            type : req.user.__t
         },
         userList: UserList.key,
         version: keystone.version,

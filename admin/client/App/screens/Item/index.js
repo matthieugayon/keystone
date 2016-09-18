@@ -90,6 +90,8 @@ var ItemView = React.createClass({
 								refList={refList}
 								relatedItemId={this.props.params.itemId}
 								relationship={relationship}
+								user={this.props.user}
+								permissions={this.props.permissions}
 							/>
 						);
 					})}

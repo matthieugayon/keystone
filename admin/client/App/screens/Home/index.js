@@ -32,6 +32,7 @@ var HomeView = React.createClass({
 	},
 	render () {
 		const spinner = this.getSpinner();
+
 		return (
 			<Container data-screen-id="home">
 				<div className="dashboard-header">
@@ -58,8 +59,26 @@ var HomeView = React.createClass({
 						<div>
 							{/* Render nav with sections */}
 							{Keystone.nav.sections.map((navSection) => {
+
+								let hasListReadPermissions = {};
+								let hasReadPermissionsForSomeLists = false;
+
+								_.map(navSection.lists, (list, key) => {
+									hasListReadPermissions[list.key] = Keystone.user.roles.filter((n) => {
+											return Keystone.permissions[list.key].roles.read.indexOf(n) != -1;
+									}).length > 0;
+									hasReadPermissionsForSomeLists = hasReadPermissionsForSomeLists ? hasReadPermissionsForSomeLists : hasListReadPermissions[list.key];
+								});
+								if (!hasReadPermissionsForSomeLists) return null;
+
 								return (
-									<Section key={navSection.key} id={navSection.key} label={navSection.label}>
+									<Section
+											key={navSection.key}
+											id={navSection.key}
+											label={navSection.label}
+											user={Keystone.user}
+											permissions={Keystone.permissions}>
+
 										<Lists
 											counts={this.props.counts}
 											lists={navSection.lists}

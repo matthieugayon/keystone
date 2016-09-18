@@ -180,11 +180,33 @@ module.exports = Field.create({
 		this.toggleCreate(false);
 	},
 
+	checkPermissions() {
+		const user = this.props.user;
+		let userType;
+		const noEditCustom = this.props.noEditCustom;
+
+		if (user) {
+			userType = this.props.user.type;
+
+			if (userType) {
+				if (noEditCustom && noEditCustom.indexOf(userType) !== -1) {
+					return true;
+				}
+			} else {
+				return false;
+			}
+		}
+		return false;
+	},
+
 	renderSelect (noedit) {
+
+		let noEditCustom = this.checkPermissions() || noedit;
+
 		return (
 			<Select.Async
 				multi={this.props.many}
-				disabled={noedit}
+				disabled={noEditCustom}
 				loadOptions={this.loadOptions}
 				labelKey="name"
 				name={this.props.path}

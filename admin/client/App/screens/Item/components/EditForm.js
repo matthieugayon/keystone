@@ -250,6 +250,8 @@ var EditForm = React.createClass({
 					});
 				}
 				props.key = field.path;
+				props.user = this.props.user;
+				props.permissions = this.props.permissions;
 				return React.createElement(Fields[field.type], props);
 			}
 		}, this);

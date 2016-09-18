@@ -22,6 +22,7 @@ var DEFAULT_OPTION_KEYS = [
 	'required',
 	'col',
 	'noedit',
+	'noEditCustom',
 	'nocol',
 	'nosort',
 	'nofilter',
@@ -51,7 +52,6 @@ function Field (list, path, options) {
 	this.options = _.defaults({}, options, this.defaults);
 	this.label = options.label || utils.keyToLabel(this.path);
 	this.typeDescription = options.typeDescription || this.typeDescription || this.type;
-
 	this.list.automap(this);
 
 	// Warn on required fields that aren't initial
@@ -225,6 +225,7 @@ definePrototypeGetters(Field, {
 	note: function () { return this.options.note || ''; },
 	col: function () { return this.options.col || false; },
 	noedit: function () { return this.options.noedit || false; },
+	noEditCustom : function () { return this.options.noEditCustom || false; },
 	nocol: function () { return this.options.nocol || false; },
 	nosort: function () { return this.options.nosort || false; },
 	nofilter: function () { return this.options.nofilter || false; },
