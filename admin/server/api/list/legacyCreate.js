@@ -13,6 +13,12 @@ module.exports = function (req, res) {
 				return res.apiError(500, 'error', err);
 			}
 		}
-		res.json(req.list.getData(item));
+		if (req.list.schema.methods.postSave) {
+			req.list.schema.methods.postSave(req, item, function() {
+				res.json(req.list.getData(item));
+			});
+		} else {
+			res.json(req.list.getData(item));
+		}
 	});
 };

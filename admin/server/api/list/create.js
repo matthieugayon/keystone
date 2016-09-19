@@ -7,6 +7,8 @@ module.exports = function (req, res) {
 		return res.apiError(403, 'invalid csrf');
 	}
 
+	console.log('create');
+
 	var item = new req.list.model();
 	var data = assign({}, req.body, req.files);
 
@@ -27,7 +29,14 @@ module.exports = function (req, res) {
 				if (err) return res.status(400).json(err);
 				req.list.updateItem(item, data, function (err) {
 					if (err) return res.status(500).json(err);
-					res.json(req.list.getData(item));
+					
+					if (req.list.schema.methods.postSave) {
+						req.list.schema.methods.postSave(req, item, function() {
+							res.json(req.list.getData(item));
+						});
+					} else {
+						res.json(req.list.getData(item));
+					}
 				});
 			});
 		});
