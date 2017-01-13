@@ -7,7 +7,7 @@ import { Button, Checkbox, Form, FormField, InputGroup, SegmentedControl } from 
 import { downloadItems } from '../actions';
 const FORMAT_OPTIONS = [
 	{ label: 'CSV', value: 'csv' },
-	{ label: 'JSON', value: 'json' },
+	//{ label: 'JSON', value: 'json' },
 ];
 
 var ListDownloadForm = React.createClass({
@@ -66,7 +66,13 @@ var ListDownloadForm = React.createClass({
 		this.setState(newState);
 	},
 	handleDownloadRequest () {
-		this.props.dispatch(downloadItems(this.state.format, Object.keys(this.state.selectedColumns)));
+		let columns = Object.keys(this.state.selectedColumns);
+		if (this.state.useCurrentColumns) {
+			columns = this.getListUIElements().map((el)=> {
+				return el.field.path;
+			});
+		}
+		this.props.dispatch(downloadItems(this.state.format, columns));
 		this.togglePopout(false);
 	},
 	renderColumnSelect () {
@@ -115,7 +121,7 @@ var ListDownloadForm = React.createClass({
 								<SegmentedControl equalWidthSegments options={FORMAT_OPTIONS} value={this.state.format} onChange={this.changeFormat} />
 							</FormField>
 							<FormField label="Columns:">
-								<Checkbox autofocus label="Use currently selected" onChange={this.toggleCurrentlySelectedColumns} value checked={useCurrentColumns} />
+								<Checkbox autofocus label="Use all" onChange={this.toggleCurrentlySelectedColumns} value checked={useCurrentColumns} />
 							</FormField>
 							{this.renderColumnSelect()}
 						</Form>
