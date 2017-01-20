@@ -2,6 +2,7 @@ var keystone = require('../../../../');
 var moment = require('moment');
 var assign = require('object-assign');
 var async = require('async');
+var _ = require('lodash');
 
 module.exports = function (req, res) {
 	var baby = require('babyparse');
@@ -36,7 +37,7 @@ module.exports = function (req, res) {
 			function buildQuery() {
 				query = req.list.model.find(where);
 				if (req.query.populate) {
-					query.populate(req.query.populate);
+					//query.populate(req.query.populate);
 				}
 				if (req.query.expandRelationshipFields) {
 					req.list.relationshipFields.forEach(function (i) {
@@ -56,6 +57,22 @@ module.exports = function (req, res) {
 					data = results.map(function (item) {
 						return req.list.getCSV(item, req.query.select, req.query.expandRelationshipFields);
 					});
+
+					// cleaning
+					var dataProcessed = _.map(data, function (item) {
+						delete item.key;
+						delete item.id;
+						_.each(item, function (value, key) {
+							try {
+								var field = JSON.parse(value);
+								if (field && field.id && field.name) {
+									item[key] = field.name;
+								}
+							} catch(e) {}
+						});
+						return item;
+					});
+
 					res.attachment(req.list.path + '-' + moment().format('YYYYMMDD-HHMMSS') + '.csv');
 					res.setHeader('Content-Type', 'application/octet-stream');
 					var content = baby.unparse(data, {
